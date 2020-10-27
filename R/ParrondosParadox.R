@@ -39,11 +39,11 @@ parrondosParadox <- function(noplays = 500,
       c2 = 0.1
     )
     if (runif(1) < 0.5) {
-      retC <-
+      retAB <-
         PlayGameA(profit = results[results$Play == (i - 1), 4], x = alpha, c =
                     0.5)
     } else {
-      retC <-                         PlayGameB(
+      retAB <-                         PlayGameB(
         profit = results[results$Play == (i - 1), 4],
         x1 = alpha,
         c1 = 0.75,
@@ -54,7 +54,7 @@ parrondosParadox <- function(noplays = 500,
     results = rbind(results, c(i,
                                retA,
                                retB,
-                               retC))
+                               retAB))
   }
   results = rbind(
     data.frame(
