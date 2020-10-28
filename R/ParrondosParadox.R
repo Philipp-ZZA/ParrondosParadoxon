@@ -73,7 +73,7 @@ parrondosParadox <- function(noplays = 500,
       Profit = results$ProfitAB
     )
   )
-  ret <- ggplot2::ggplot(results, ggplot2::aes(
+  ggplot2::ggplot(results, ggplot2::aes(
     Profit,
     x = Play,
     y = Profit,
@@ -85,6 +85,7 @@ parrondosParadox <- function(noplays = 500,
                                 "Profit") +
     ggplot2::labs(title = "Evolution of profit games along 500 plays") +
     ggplot2::geom_line(size = 3) + opts
+  ret <- ggplot2::ggsave(filename = "Test.png")
   ####################################################################
   #DISTRIBUTION
   ####################################################################
@@ -143,17 +144,17 @@ parrondosParadox <- function(noplays = 500,
     data.frame(Game = "B", Profit = results2$ProfitB),
     data.frame(Game = "A+B", Profit = results2$ProfitAB)
   )
-  ggplot(results2, aes(Profit, fill = Game)) +
-    scale_x_continuous(limits = c(-150, 150), "Profit") +
-    scale_y_continuous(
+  ggplot2::ggplot(results2, ggplot2::aes(Profit, fill = Game)) +
+    ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
+    ggplot2::scale_y_continuous(
       limits = c(0, 0.02),
       expand = c(0, 0),
-      "Density",
-      labels = percent
+      "Density"
     ) +
-    labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
+    ggplot2::labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
                          "")) +
-    geom_density(alpha = .75) + opts
+    ggplot2::geom_density(alpha = .75) + opts
+  ret <- ggplot2::ggsave('results2.png')
 }
 
 PlayGameA <- function(profit, x, c) {
