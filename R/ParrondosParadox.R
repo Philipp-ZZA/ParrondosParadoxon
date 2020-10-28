@@ -43,7 +43,7 @@ parrondosParadox <- function(noplays = 500,
         PlayGameA(profit = results[results$Play == (i - 1), 4], x = alpha, c =
                     0.5)
     } else {
-      retAB <-                         PlayGameB(
+      retAB <- PlayGameB(
         profit = results[results$Play == (i - 1), 4],
         x1 = alpha,
         c1 = 0.75,
@@ -105,35 +105,35 @@ parrondosParadox <- function(noplays = 500,
       ProfitAB = profit0
     )
     for (i in 1:noplays) {
-      results = rbind(results,
-                      c(
-                        i,
-                        PlayGameA(
-                          profit = results[results$Play == (i - 1), 2],
-                          x = alpha,
-                          c = 0.5
-                        ),
-                        PlayGameB(
-                          profit = results[results$Play == (i - 1), 3],
-                          x1 = alpha,
-                          c1 = 0.75,
-                          x2 = alpha,
-                          c2 = 0.1
-                        ),
-                        if (runif(1) < 0.5)
-                          PlayGameA(
-                            profit = results[results$Play == (i - 1), 4],
-                            x = alpha,
-                            c = 0.5
-                          )
-                        else
-                          PlayGameB(
-                            profit = results[results$Play == (i - 1), 4],
-                            x1 = alpha,
-                            c1 = 0.75,
-                            x2 = alpha,
-                            c2 = 0.1
-                          )
+      retA <- PlayGameA(
+        profit = results[results$Play == (i - 1), 2],
+        x = alpha,
+        c = 0.5
+      )
+      retB <- PlayGameB(
+        profit = results[results$Play == (i - 1), 3],
+        x1 = alpha,
+        c1 = 0.75,
+        x2 = alpha,
+        c2 = 0.1
+      )
+      if (runif(1) < 0.5) {
+        retAB <- PlayGameA(profit = results[results$Play == (i - 1), 4],
+                           x = alpha,
+                           c = 0.5)
+      } else{
+        retAB <- PlayGameB(
+          profit = results[results$Play == (i - 1), 4],
+          x1 = alpha,
+          c1 = 0.75,
+          x2 = alpha,
+          c2 = 0.1
+        )
+      }
+      results = rbind(results,c(i,
+                        retA,
+                        retB,
+                        retAB
                       ))
     }
     results2 = rbind(results2, results[results$Play == noplays,])
