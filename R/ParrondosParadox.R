@@ -9,8 +9,11 @@ parrondosParadox <- function(runs = 1,
                              noplays = 500,
                              alpha = 0.005,
                              profit0 = 0,
-                             singlePlot = 100) {
+                             singlePlot = 100,
+                             genSeq = "") {
   ret <- createDirs()
+  genSeq <- toupper(gsub("[^AB]","",genSeq))
+  seqLen <- nchar(genSeq)
   opts = ggplot2::theme(
     legend.position = "bottom",
     legend.background = ggplot2::element_rect(colour = "black"),
@@ -52,7 +55,13 @@ parrondosParadox <- function(runs = 1,
         x2 = alpha,
         c2 = 0.1
       )
-      if (runif(1) < 0.5) {
+      if(nchar(genSeq) > 0) {
+        tmp <- substr(genSeq,start=(i%%seqLen),stop=(i%%seqLen))
+        ret <- ifelse(tmp == "A", T, F)
+      } else {
+        ret <- runif(1) < 0.5
+      }
+      if (ret) {
         retAB <- PlayGameA(profit = results[results$Play == (i - 1), 4],
                            x = alpha,
                            c = 0.5)
