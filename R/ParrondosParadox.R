@@ -108,7 +108,7 @@ parrondosParadox <- function(runs = 1,
       tmpName <- paste0("single-res-of-run-", run, ".png")
       ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
       tmpName <- paste0("excelres/", gsub(".png$", ".xlsx", tmpName))
-      ret <- writexl::write_xlsx(x = singleRes, path = tmpName)
+      ret <- writexl::write_xlsx(x = results, path = tmpName)
     }
     results2 = rbind(results2, results[results$Play == noplays,])
   }
