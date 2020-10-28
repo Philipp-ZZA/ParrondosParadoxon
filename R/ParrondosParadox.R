@@ -80,7 +80,7 @@ parrondosParadox <- function(runs = 1,
                                  retAB))
     }
     if (run %% singlePlot == 1) {
-      singleRes = rbind(
+      tmpRes = rbind(
         data.frame(
           Play = results$Play,
           Game = "A",
@@ -101,7 +101,7 @@ parrondosParadox <- function(runs = 1,
                        noplays,
                        "plays, iteration",
                        run)
-      ggplot2::ggplot(singleRes,
+      ggplot2::ggplot(tmpRes,
                       ggplot2::aes(
                         Profit,
                         x = Play,
@@ -122,12 +122,12 @@ parrondosParadox <- function(runs = 1,
     results2 = rbind(results2, results[results$Play == noplays,])
   }
   if(runs > 10) {
-    results2 = rbind(
+    tmpRes = rbind(
       data.frame(Game = "A", Profit = results2$ProfitA),
       data.frame(Game = "B", Profit = results2$ProfitB),
       data.frame(Game = "A+B", Profit = results2$ProfitAB)
     )
-    ggplot2::ggplot(results2, ggplot2::aes(Profit, fill = Game)) +
+    ggplot2::ggplot(tmpRes, ggplot2::aes(Profit, fill = Game)) +
       ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
       ggplot2::scale_y_continuous(limits = c(0, 0.035),
                                   expand = c(0, 0),
