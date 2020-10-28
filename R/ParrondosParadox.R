@@ -10,9 +10,7 @@ parrondosParadox <- function(runs = 1,
                              alpha = 0.005,
                              profit0 = 0,
                              singlePlot = 100) {
-  if(!dir.exists("plotres")) {
-    ret <- dir.create("plotres")
-  }
+  ret <- createDirs()
   opts = ggplot2::theme(
     legend.position = "bottom",
     legend.background = ggplot2::element_rect(colour = "black"),
@@ -109,6 +107,8 @@ parrondosParadox <- function(runs = 1,
         ggplot2::geom_line(size = 3) + opts
       tmpName <- paste0("single-res-of-run-", run, ".png")
       ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
+      tmpName <- paste0("excelres/", gsub(".png$", ".xlsx", tmpName))
+      ret <- writexl::write_xlsx(x = singleRes, path = tmpName)
     }
     results2 = rbind(results2, results[results$Play == noplays,])
   }
@@ -120,7 +120,7 @@ parrondosParadox <- function(runs = 1,
     )
     ggplot2::ggplot(results2, ggplot2::aes(Profit, fill = Game)) +
       ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
-      ggplot2::scale_y_continuous(limits = c(0, 0.02),
+      ggplot2::scale_y_continuous(limits = c(0, 0.035),
                                   expand = c(0, 0),
                                   "Density") +
       ggplot2::labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
@@ -135,6 +135,8 @@ parrondosParadox <- function(runs = 1,
       "-dp.png"
     )
     ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
+    tmpName <- paste0("excelres/", gsub(".png$", ".xlsx", tmpName))
+    ret <- writexl::write_xlsx(x = results2, path = tmpName)
   }
 }
 
@@ -151,5 +153,14 @@ PlayGameB <- function(profit, x1, c1, x2, c2) {
     PlayGameA(profit, x = x1, c = c1)
   } else {
     PlayGameA(profit, x = x2, c = c2)
+  }
+}
+
+createDirs <- function() {
+  if(!dir.exists("plotres")) {
+    ret <- dir.create("plotres")
+  }
+  if(!dir.exists("excelres")) {
+    ret <- dir.create("excelres")
   }
 }
