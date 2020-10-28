@@ -14,6 +14,10 @@ parrondosParadox <- function(runs = 1,
   ret <- createDirs()
   genSeq <- toupper(gsub("[^AB]","",genSeq))
   seqLen <- nchar(genSeq)
+  subTitle <- genSeq
+  if(seqLen == 0){
+    subTitle <- "Random Strategy"
+  }
   opts = ggplot2::theme(
     legend.position = "bottom",
     legend.background = ggplot2::element_rect(colour = "black"),
@@ -42,7 +46,8 @@ parrondosParadox <- function(runs = 1,
       Play = 0,
       ProfitA = profit0,
       ProfitB = profit0,
-      ProfitAB = profit0
+      ProfitAB = profit0,
+      GameSequence = ""
     )
     for (i in 1:noplays) {
       retA <- PlayGameA(profit = results[results$Play == (i - 1), 2],
@@ -56,7 +61,11 @@ parrondosParadox <- function(runs = 1,
         c2 = 0.1
       )
       if(nchar(genSeq) > 0) {
-        tmp <- substr(genSeq,start=(i%%seqLen),stop=(i%%seqLen))
+        ind <- i%%seqLen
+        if(ind == 0) {
+          ind <- seqLen
+        }
+        tmp <- substr(genSeq,start=ind,stop=ind)
         ret <- ifelse(tmp == "A", T, F)
       } else {
         ret <- runif(1) < 0.5
@@ -65,6 +74,7 @@ parrondosParadox <- function(runs = 1,
         retAB <- PlayGameA(profit = results[results$Play == (i - 1), 4],
                            x = alpha,
                            c = 0.5)
+        gameSeq <- "A"
       } else{
         retAB <- PlayGameB(
           profit = results[results$Play == (i - 1), 4],
@@ -73,11 +83,16 @@ parrondosParadox <- function(runs = 1,
           x2 = alpha,
           c2 = 0.1
         )
+        gameSeq <- "B"
       }
-      results = rbind(results, c(i,
-                                 retA,
-                                 retB,
-                                 retAB))
+      tmpRes = data.frame(
+        Play = i,
+        ProfitA = retA,
+        ProfitB = retB,
+        ProfitAB = retAB,
+        GameSequence = gameSeq
+      )
+      results = rbind(results, tmpRes)
     }
     if (run %% singlePlot == 1) {
       tmpRes = rbind(
@@ -112,7 +127,7 @@ parrondosParadox <- function(runs = 1,
         ggplot2::scale_y_continuous(limits = c(-75, 75),
                                     expand = c(0, 0),
                                     "Profit") +
-        ggplot2::labs(title = tmpName) +
+        ggplot2::labs(title = tmpName, subtitle = subTitle) +
         ggplot2::geom_line(size = 3) + opts
       tmpName <- paste0("single-res-of-run-", run, ".png")
       ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
@@ -127,13 +142,14 @@ parrondosParadox <- function(runs = 1,
       data.frame(Game = "B", Profit = results2$ProfitB),
       data.frame(Game = "A+B", Profit = results2$ProfitAB)
     )
+    results2[,"GameSequence"] <- NULL
     ggplot2::ggplot(tmpRes, ggplot2::aes(Profit, fill = Game)) +
       ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
       ggplot2::scale_y_continuous(limits = c(0, 0.035),
                                   expand = c(0, 0),
                                   "Density") +
       ggplot2::labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
-                                    "")) +
+                                    ""), subtitle = subTitle) +
       ggplot2::geom_density(alpha = .75) + opts
     tmpName <- paste0(
       format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
