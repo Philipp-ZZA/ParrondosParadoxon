@@ -10,6 +10,9 @@ parrondosParadox <- function(runs = 1,
                              alpha = 0.005,
                              profit0 = 0,
                              singlePlot = 100) {
+  if(!dir.exists("plotres")) {
+    ret <- dir.create("plotres")
+  }
   opts = ggplot2::theme(
     legend.position = "bottom",
     legend.background = ggplot2::element_rect(colour = "black"),
