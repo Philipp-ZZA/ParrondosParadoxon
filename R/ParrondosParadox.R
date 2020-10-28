@@ -1,8 +1,8 @@
 #' Main function of analysis of Parrondos Paradox
 #' @param runs number of iterations
 #' @param noplays number of games or plays for one iteration
-#' @param alpha toDo
-#' @param profit0 toDo
+#' @param alpha toDo bias parameter of coins
+#' @param profit0 toDo starting capital at n = 0
 #' @param singlePlot plot a result after an amount of iterations
 #' @export
 parrondosParadox <- function(runs = 1,
