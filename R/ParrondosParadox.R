@@ -1,9 +1,15 @@
 #' Main function of analysis of Parrondos Paradox
-#' @param noplays number of plays
+#' @param runs number of iterations
+#' @param noplays number of games or plays for one iteration
+#' @param alpha toDo
+#' @param profit0 toDo
+#' @param singlePlot plot a result after an amount of iterations
 #' @export
-parrondosParadox <- function(noplays = 500,
+parrondosParadox <- function(runs = 1,
+                             noplays = 500,
                              alpha = 0.005,
-                             profit0 = 0) {
+                             profit0 = 0,
+                             singlePlot = 100) {
   opts = ggplot2::theme(
     legend.position = "bottom",
     legend.background = ggplot2::element_rect(colour = "black"),
@@ -19,86 +25,15 @@ parrondosParadox <- function(noplays = 500,
     plot.title = ggplot2::element_text(size = 35)
   )
   ####################################################################
-  #EVOLUTION
+  #EVOLUTION runs = 1 DISTRIBUTION runs > 10
   ####################################################################
-  results = data.frame(
-    Play = 0,
-    ProfitA = profit0,
-    ProfitB = profit0,
-    ProfitAB = profit0
-  )
-  for (i in 1:noplays) {
-    retA <- PlayGameA(profit = results[results$Play == (i - 1), 2],
-                      x = alpha,
-                      c = 0.5)
-    retB <- PlayGameB(
-      profit = results[results$Play == (i - 1), 3],
-      x1 = alpha,
-      c1 = 0.75,
-      x2 = alpha,
-      c2 = 0.1
-    )
-    if (runif(1) < 0.5) {
-      retAB <-
-        PlayGameA(profit = results[results$Play == (i - 1), 4], x = alpha, c =
-                    0.5)
-    } else {
-      retAB <- PlayGameB(
-        profit = results[results$Play == (i - 1), 4],
-        x1 = alpha,
-        c1 = 0.75,
-        x2 = alpha,
-        c2 = 0.1
-      )
-    }
-    results = rbind(results, c(i,
-                               retA,
-                               retB,
-                               retAB))
-  }
-  results = rbind(
-    data.frame(
-      Play = results$Play,
-      Game = "A",
-      Profit = results$ProfitA
-    ),
-    data.frame(
-      Play = results$Play,
-      Game = "B",
-      Profit = results$ProfitB
-    ),
-    data.frame(
-      Play = results$Play,
-      Game = "A+B",
-      Profit = results$ProfitAB
-    )
-  )
-  ggplot2::ggplot(results, ggplot2::aes(
-    Profit,
-    x = Play,
-    y = Profit,
-    color = Game
-  )) +
-    ggplot2::scale_x_continuous(limits = c(0, noplays), "Plays") +
-    ggplot2::scale_y_continuous(limits = c(-75, 75),
-                                expand = c(0, 0),
-                                "Profit") +
-    ggplot2::labs(title = "Evolution of profit games along 500 plays") +
-    ggplot2::geom_line(size = 3) + opts
-  ret <- ggplot2::ggsave(filename = "Test.png")
-  ####################################################################
-  #DISTRIBUTION
-  ####################################################################
-  noplays = 1000
-  alpha = 0.005
-  profit0 = 0
   results2 = data.frame(
     Play = numeric(0),
     ProfitA = numeric(0),
     ProfitB = numeric(0),
     ProfitAB = numeric(0)
   )
-  for (j in 1:100) {
+  for (run in 1:runs) {
     results = data.frame(
       Play = 0,
       ProfitA = profit0,
@@ -106,11 +41,9 @@ parrondosParadox <- function(noplays = 500,
       ProfitAB = profit0
     )
     for (i in 1:noplays) {
-      retA <- PlayGameA(
-        profit = results[results$Play == (i - 1), 2],
-        x = alpha,
-        c = 0.5
-      )
+      retA <- PlayGameA(profit = results[results$Play == (i - 1), 2],
+                        x = alpha,
+                        c = 0.5)
       retB <- PlayGameB(
         profit = results[results$Play == (i - 1), 3],
         x1 = alpha,
@@ -131,30 +64,75 @@ parrondosParadox <- function(noplays = 500,
           c2 = 0.1
         )
       }
-      results = rbind(results,c(i,
-                        retA,
-                        retB,
-                        retAB
-                      ))
+      results = rbind(results, c(i,
+                                 retA,
+                                 retB,
+                                 retAB))
+    }
+    if (run %% singlePlot == 1) {
+      singleRes = rbind(
+        data.frame(
+          Play = results$Play,
+          Game = "A",
+          Profit = results$ProfitA
+        ),
+        data.frame(
+          Play = results$Play,
+          Game = "B",
+          Profit = results$ProfitB
+        ),
+        data.frame(
+          Play = results$Play,
+          Game = "A+B",
+          Profit = results$ProfitAB
+        )
+      )
+      tmpName <- paste("Evolution of profit games along",
+                       noplays,
+                       "plays, iteration",
+                       run)
+      ggplot2::ggplot(singleRes,
+                      ggplot2::aes(
+                        Profit,
+                        x = Play,
+                        y = Profit,
+                        color = Game
+                      )) +
+        ggplot2::scale_x_continuous(limits = c(0, noplays), "Plays") +
+        ggplot2::scale_y_continuous(limits = c(-75, 75),
+                                    expand = c(0, 0),
+                                    "Profit") +
+        ggplot2::labs(title = tmpName) +
+        ggplot2::geom_line(size = 3) + opts
+      tmpName <- paste0("single-res-of-run-", run, ".png")
+      ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
     }
     results2 = rbind(results2, results[results$Play == noplays,])
   }
-  results2 = rbind(
-    data.frame(Game = "A", Profit = results2$ProfitA),
-    data.frame(Game = "B", Profit = results2$ProfitB),
-    data.frame(Game = "A+B", Profit = results2$ProfitAB)
-  )
-  ggplot2::ggplot(results2, ggplot2::aes(Profit, fill = Game)) +
-    ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
-    ggplot2::scale_y_continuous(
-      limits = c(0, 0.02),
-      expand = c(0, 0),
-      "Density"
-    ) +
-    ggplot2::labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
-                         "")) +
-    ggplot2::geom_density(alpha = .75) + opts
-  ret <- ggplot2::ggsave('results2.png')
+  if(runs > 10) {
+    results2 = rbind(
+      data.frame(Game = "A", Profit = results2$ProfitA),
+      data.frame(Game = "B", Profit = results2$ProfitB),
+      data.frame(Game = "A+B", Profit = results2$ProfitAB)
+    )
+    ggplot2::ggplot(results2, ggplot2::aes(Profit, fill = Game)) +
+      ggplot2::scale_x_continuous(limits = c(-150, 150), "Profit") +
+      ggplot2::scale_y_continuous(limits = c(0, 0.02),
+                                  expand = c(0, 0),
+                                  "Density") +
+      ggplot2::labs(title = paste("Parrondo's Paradox (", as.character(noplays), " plays)", sep =
+                                    "")) +
+      ggplot2::geom_density(alpha = .75) + opts
+    tmpName <- paste0(
+      format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
+      "-runs-",
+      runs,
+      "-per-plays-",
+      noplays,
+      "-dp.png"
+    )
+    ret <- ggplot2::ggsave(filename = tmpName, path = "plotres")
+  }
 }
 
 PlayGameA <- function(profit, x, c) {
